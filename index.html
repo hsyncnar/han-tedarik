@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HAN — Türkiye Tedarik Ağı | Doğrulanmış Türk üreticilerden toptan tedarik</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="assets/css/styles.css">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;800;900&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+</head>
+<body>
+
+<div class="utility">
+  <div class="wrap">
+    <span><span class="dot"></span>Doğrulanmış üretici ağı · 81 il</span>
+    <div class="right">
+      <a href="#nasil">Nasıl çalışır</a>
+      <a href="#tedarikci">Tedarikçi ol</a>
+      <a href="#">Türkçe / EN / عربي</a>
+    </div>
+  </div>
+</div>
+
+<header class="main">
+  <div class="wrap bar">
+    <a class="logo" href="#">
+      <svg class="mark" viewBox="0 0 40 40" aria-hidden="true">
+        <rect width="40" height="40" rx="7" fill="#123F63"/>
+        <path d="M10 30V19a4 4 0 018 0v11" stroke="#0E9C9C" stroke-width="2.6" fill="none"/>
+        <path d="M22 30V19a4 4 0 018 0v11" stroke="#fff" stroke-width="2.6" fill="none"/>
+        <path d="M7 31h26" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>
+      </svg>
+      <span><b data-brand="name">HAN</b><small data-brand="tag">Tedarik Ağı</small></span>
+    </a>
+
+    <form class="searchbox" onsubmit="doSearch(event)">
+      <select id="searchCat" aria-label="Kategori seç"><option value="">Tüm kategoriler</option></select>
+      <input id="searchInput" type="search" placeholder="Ürün, malzeme veya üretici ara — örn. bukle havlu, antep fıstığı" aria-label="Ara">
+      <button type="submit">Ara</button>
+    </form>
+
+    <div class="acts">
+      <button class="btn btn-ghost" onclick="scrollTo2('#tedarikci')">Tedarikçi ol</button>
+      <button class="rfq-btn" onclick="openDrawer()">Teklif sepeti<span class="count" id="rfqCount">0</span></button>
+    </div>
+  </div>
+  <nav class="cats" aria-label="Kategoriler"><div class="wrap" id="catNav"></div></nav>
+</header>
+
+<div class="hero">
+  <svg class="hero-arches" aria-hidden="true" preserveAspectRatio="none" viewBox="0 0 1200 320">
+    <defs><pattern id="ar" width="150" height="320" patternUnits="userSpaceOnUse">
+      <path d="M20 320V120a55 55 0 01110 0v200" fill="none" stroke="#0E9C9C" stroke-width="2"/>
+    </pattern></defs>
+    <rect width="1200" height="320" fill="url(#ar)"/>
+  </svg>
+  <div class="wrap">
+    <div>
+      <div class="eyebrow">Türkiye · Üretici doğrulama · FOB & EXW teklif</div>
+      <h1 data-brand="hero-title">Türk üreticisinden<br>doğrudan tedarik.<br><em>Aracısız, MOQ net.</em></h1>
+      <p class="lede" data-brand="hero-lede"></p>
+      <form class="hero-search" onsubmit="doSearch(event)">
+        <input id="heroInput" type="search" placeholder="Ne tedarik etmek istiyorsunuz?" aria-label="Ürün ara">
+        <button type="submit" class="btn btn-bole">Üretici bul</button>
+        <button type="button" class="btn btn-ghost" style="color:#fff;border-color:#39424A" onclick="openDrawer()">Toplu teklif iste (RFQ)</button>
+      </form>
+      <div class="tags">
+        <span>Popüler:</span>
+        <button onclick="quick('havlu')">bukle havlu</button>
+        <button onclick="quick('fıstık')">antep fıstığı</button>
+        <button onclick="quick('halı')">makine halısı</button>
+        <button onclick="quick('koltuk')">koltuk takımı</button>
+        <button onclick="quick('zeytinyağı')">zeytinyağı</button>
+      </div>
+    </div>
+    <div class="stats" id="heroStats"></div>
+    </div>
+  </div>
+</div>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div><h2>Sektöre göre üretici</h2><p>Türkiye'nin ihracatta güçlü olduğu üretim kollarında doğrulanmış tedarikçiler</p></div>
+      <a class="more" href="#katalog">Tüm katalog</a>
+    </div>
+    <div class="arches" id="archGrid"></div>
+  </div>
+</section>
+
+<section id="katalog" style="padding-top:8px">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><h2>Toptan ürün kataloğu</h2><p>Fiyatlar birim başı FOB İzmir/İstanbul referansıdır; kademeli fiyat için ürüne girin</p></div>
+    </div>
+    <div class="catalog">
+      <aside class="filters">
+        <div class="fgroup">
+          <h4>Kategori</h4>
+          <select id="fCat" onchange="render()"><option value="">Tümü</option></select>
+        </div>
+        <div class="fgroup">
+          <h4>Üretim şehri</h4>
+          <select id="fCity" onchange="render()"><option value="">Tüm şehirler</option></select>
+        </div>
+        <div class="fgroup">
+          <h4>Birim fiyat (USD)</h4>
+          <div class="range">
+            <input type="number" id="fMin" placeholder="min" onchange="render()">
+            <input type="number" id="fMax" placeholder="max" onchange="render()">
+          </div>
+        </div>
+        <div class="fgroup">
+          <h4>Tedarikçi filtresi</h4>
+          <label class="check"><input type="checkbox" id="fVer" onchange="render()"> Yerinde denetimli üretici</label>
+          <label class="check"><input type="checkbox" id="fSample" onchange="render()"> Numune gönderiyor</label>
+          <label class="check"><input type="checkbox" id="fOem" onchange="render()"> OEM / özel üretim</label>
+          <label class="check"><input type="checkbox" id="fLowMoq" onchange="render()"> Düşük MOQ (≤ 300)</label>
+        </div>
+        <div class="fgroup">
+          <button class="btn btn-ghost" style="width:100%" onclick="resetFilters()">Filtreleri temizle</button>
+        </div>
+      </aside>
+
+      <div>
+        <div class="toolbar">
+          <span class="n"><b id="resCount">0</b> ürün · <span id="resSupp">0</span> üretici</span>
+          <select id="sortBy" onchange="render()">
+            <option value="rel">Önerilen sıralama</option>
+            <option value="priceAsc">Fiyat: düşükten yükseğe</option>
+            <option value="priceDesc">Fiyat: yüksekten düşüğe</option>
+            <option value="moq">MOQ: düşükten yükseğe</option>
+            <option value="rating">Tedarikçi puanı</option>
+          </select>
+        </div>
+        <div class="grid" id="grid"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="suppliers" id="nasil">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><h2>Öne çıkan üreticiler</h2><p>Denetim raporu, kapasite ve sertifikaları görünür olan firmalar</p></div>
+    </div>
+    <div class="srow" id="suppRow"></div>
+  </div>
+</section>
+
+<section class="sell" id="tedarikci">
+  <div class="wrap">
+    <div>
+      <div class="eyebrow" style="color:#7FD6D6">Üretici kaydı</div>
+      <h2>Fabrikanızı 112 ülkedeki alıcıya açın</h2>
+      <p>Vitrin açmak ücretsiz. Kapasite, sertifika ve referanslarınızı bir kez yükleyin; alıcıların teklif talepleri doğrudan panelinize düşsün.</p>
+      <ul>
+        <li>Vergi levhası ve kapasite raporu ile doğrulama, ortalama 3 iş günü</li>
+        <li>Ürün başına kademeli fiyat, MOQ ve üretim süresi tanımlama</li>
+        <li>Gelen RFQ'lara panelden tek tıkla proforma dönüşü</li>
+        <li>İhracat evrağı (ATR, EUR.1, menşe) için lojistik partner yönlendirmesi</li>
+      </ul>
+    </div>
+    <form class="sellform" onsubmit="supplierSubmit(event)">
+      <h3>Ücretsiz üretici kaydı</h3>
+      <p>Formu bırakın, doğrulama ekibi 1 iş günü içinde arasın.</p>
+      <div class="field"><label for="s1">Firma unvanı</label><input id="s1" required placeholder="Örn. Uludağ Örme Tekstil San. Tic. A.Ş."></div>
+      <div class="field"><label for="s2">Üretim kolu</label><select id="s2" required></select></div>
+      <div class="field"><label for="s3">Şehir</label><input id="s3" required placeholder="Bursa"></div>
+      <div class="field"><label for="s4">Yetkili e-posta</label><input id="s4" type="email" required placeholder="ihracat@firma.com.tr"></div>
+      <button class="btn btn-dark" style="width:100%;margin-top:6px">Kaydı başlat</button>
+      <p class="note">Kayıt ücretsizdir, komisyon yalnızca kapanan siparişte alınır.</p>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="fgrid">
+      <div>
+        <a class="logo" href="#" style="margin-bottom:14px">
+          <svg class="mark" viewBox="0 0 40 40" aria-hidden="true">
+            <rect width="40" height="40" rx="7" fill="#1B5D8F"/>
+            <path d="M10 30V19a4 4 0 018 0v11" stroke="#0E9C9C" stroke-width="2.6" fill="none"/>
+            <path d="M22 30V19a4 4 0 018 0v11" stroke="#fff" stroke-width="2.6" fill="none"/>
+            <path d="M7 31h26" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>
+          </svg>
+          <span style="color:#fff"><b data-brand="name">HAN</b><small style="color:#7A838B" data-brand="tag">Tedarik Ağı</small></span>
+        </a>
+        <p style="max-width:34ch;font-size:14px">Türkiye'de üretilen ürünleri, üreticisinden alıcıya aracısız buluşturan B2B tedarik ağı.</p>
+      </div>
+      <div><h5>Alıcı</h5><ul>
+        <li><a href="#katalog">Ürün kataloğu</a></li><li><a href="#">Teklif talebi (RFQ)</a></li>
+        <li><a href="#">Numune süreci</a></li><li><a href="#">Ödeme güvencesi</a></li><li><a href="#">Nakliye ve gümrük</a></li></ul></div>
+      <div><h5>Üretici</h5><ul>
+        <li><a href="#tedarikci">Üretici ol</a></li><li><a href="#">Doğrulama kriterleri</a></li>
+        <li><a href="#">Vitrin yönetimi</a></li><li><a href="#">Komisyon oranları</a></li></ul></div>
+      <div><h5>Kurumsal</h5><ul>
+        <li><a href="#">Hakkımızda</a></li><li><a href="#">Basın</a></li>
+        <li><a href="#">Kariyer</a></li><li><a href="#">İletişim</a></li></ul></div>
+      <div><h5>Yardım</h5><ul>
+        <li><a href="#">Sık sorulanlar</a></li><li><a href="#">Anlaşmazlık çözümü</a></li>
+        <li><a href="#">KVKK aydınlatma</a></li><li><a href="#">Kullanım koşulları</a></li></ul></div>
+    </div>
+    <div class="fbot">
+      <span data-brand="footer">© 2026 HAN Tedarik Ağı — örnek demo sitesi</span>
+      <div class="right"><a href="#">Gizlilik</a><a href="#">Çerezler</a><a href="#">KVKK</a></div>
+    </div>
+  </div>
+</footer>
+
+<div class="scrim" id="scrim" onclick="closeAll()"></div>
+
+<aside class="drawer" id="drawer" aria-label="Teklif sepeti">
+  <div class="dhead"><h3>Teklif sepeti</h3><button onclick="closeAll()" aria-label="Kapat">×</button></div>
+  <div class="dbody" id="drawerBody"></div>
+  <div class="dfoot" id="drawerFoot"></div>
+</aside>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true"><div class="mbox" id="modalBox"></div></div>
+<div class="toast" id="toast"></div>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
