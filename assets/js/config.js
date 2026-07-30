@@ -16,13 +16,23 @@ const SITE = {
   heroTitle: 'Türk üreticisinden<br>doğrudan tedarik.<br><em>Aracısız, MOQ net.</em>',
   heroLede: "Bursa'nın örme tesisinden Gaziantep'in halı fabrikasına, Denizli havlusundan Kayseri mobilyasına — tek bir teklif talebiyle onlarca doğrulanmış üreticiye ulaşın.",
 
-  // --- Hero istatistik kutuları (ilk kutu vurgulu renkte) ---
+  // --- Hero istatistik kutuları ---
+  // v: 'auto:...' yazarsanız değer katalogdan otomatik hesaplanır.
+  // auto:uretici = kayıtlı üretici sayısı, auto:urun = ürün sayısı,
+  // auto:sehir = şehir sayısı, auto:sektor = kategori sayısı
   stats: [
-    { v: '14.280', l: 'Kayıtlı üretici' },
-    { v: '%68',    l: 'Yerinde denetimli' },
-    { v: '36 sa',  l: 'Ortalama teklif dönüşü' },
-    { v: '112',    l: 'İhracat yapılan ülke' }
+    { v: 'auto:uretici', l: 'Kayıtlı üretici' },
+    { v: 'auto:urun',    l: 'Listelenen ürün' },
+    { v: 'auto:sektor',  l: 'Sektör' },
+    { v: '36 sa',        l: 'Hedeflenen teklif dönüşü' }
   ],
+
+  // --- Tedarikçi başvuru formu ---
+  // Statik sitede form verisini saklayacak sunucu yoktur. Başvuruların size
+  // ulaşması için ücretsiz bir form servisi adresi girin (kurulum: README).
+  // Boş bırakılırsa form, hazır bir e-posta taslağı açar.
+  formEndpoint: '',                       // örn. 'https://formspree.io/f/xxxxxxx'
+  basvuruEposta: 'basvuru@han.com.tr',    // endpoint boşken kullanılacak e-posta
 
   // --- Renk kimliği ---
   colors: {

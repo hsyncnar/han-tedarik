@@ -10,6 +10,11 @@ const prod = id => P.find(p=>p.id===id);
 const fmt = n => n>=1000 ? n.toLocaleString('tr-TR') : String(n).replace('.',',');
 const money = n => '$'+n.toLocaleString('en-US',{minimumFractionDigits:n<100?2:0,maximumFractionDigits:2});
 
+function urunSayisi(catId){
+  const n = P.filter(p=>p.c===catId).length;
+  return n ? `${n} ürün` : 'yakında';
+}
+
 function motif(c,seed){
   const cat = catOf(c);
   const a = cat.c1, b = cat.c2;
@@ -32,6 +37,16 @@ function toast(msg){
 function scrollTo2(sel){document.querySelector(sel).scrollIntoView({behavior:'smooth'})}
 
 /* ============ KURULUM ============ */
+function statDeger(v){
+  if(typeof v!=='string' || !v.startsWith('auto:')) return v;
+  const k = v.slice(5);
+  if(k==='uretici') return new Set(P.map(p=>p.sup)).size;
+  if(k==='urun')    return P.length;
+  if(k==='sehir')   return new Set(P.map(p=>p.city)).size;
+  if(k==='sektor')  return CATS.length;
+  return v;
+}
+
 function applyBrand(){
   document.title = `${SITE.name} — ${SITE.tagline} | ${SITE.metaTitle}`;
   document.querySelectorAll('[data-brand="name"]').forEach(e=>e.textContent=SITE.name);
@@ -40,7 +55,8 @@ function applyBrand(){
   document.querySelectorAll('[data-brand="hero-title"]').forEach(e=>e.innerHTML=SITE.heroTitle);
   document.querySelectorAll('[data-brand="hero-lede"]').forEach(e=>e.textContent=SITE.heroLede);
   const st=document.getElementById('heroStats');
-  if(st) st.innerHTML = SITE.stats.map((s,i)=>`<div class="stat${i===0?' turq':''}"><b>${s.v}</b><span>${s.l}</span></div>`).join('');
+  if(st) st.innerHTML = SITE.stats.map((s,i)=>
+    `<div class="stat${i===0?' turq':''}"><b>${statDeger(s.v)}</b><span>${s.l}</span></div>`).join('');
   document.documentElement.style.setProperty('--tile', SITE.colors.primary);
   document.documentElement.style.setProperty('--turq', SITE.colors.accent);
   document.documentElement.style.setProperty('--bole', SITE.colors.price);
@@ -67,13 +83,26 @@ function boot(){
   document.getElementById('archGrid').innerHTML = CATS.map((c,i)=>`
     <button class="arch" onclick="pickCat('${c.id}')">
       <span class="motif" style="${motif(c.id,i)}"></span>
-      <b>${c.name}</b><small>${c.n}</small>
+      <b>${c.name}</b><small>${urunSayisi(c.id)}</small>
     </button>`).join('');
 
-  // öne çıkan üreticiler
-  const sup = ['Uludağ Örme Tekstil','Sultanhan Halı','Fıstıkzade Gıda','Selçuk Değirmen Makine']
-    .map(name=>P.find(p=>p.sup===name));
-  document.getElementById('suppRow').innerHTML = sup.map(p=>`
+  // öne çıkan üreticiler — katalogdaki doğrulanmış firmalardan
+  const gorulen = new Set();
+  const sup = P.filter(p=>{
+    if(!p.ver || gorulen.has(p.sup)) return false;
+    gorulen.add(p.sup); return true;
+  }).sort((a,b)=>b.rt-a.rt).slice(0,4);
+
+  const suppEl = document.getElementById('suppRow');
+  if(!sup.length){
+    suppEl.innerHTML = `<div class="empty" style="grid-column:1/-1">
+      <h3>Henüz yayınlanmış üretici yok</h3>
+      <p>Doğrulama sürecini tamamlayan firmalar bu alanda listelenecek.
+         Üretici ağının ilk firmalarından biri olmak için başvurun.</p>
+      <button class="btn btn-dark" onclick="scrollTo2('#tedarikci')">Üretici başvurusu yap</button>
+    </div>`;
+  } else {
+  suppEl.innerHTML = sup.map(p=>`
     <div class="scard">
       <div class="top">
         <div class="avatar" style="background:${catOf(p.c).c1}">${p.sup.slice(0,2).toUpperCase()}</div>
@@ -87,6 +116,7 @@ function boot(){
       </div>
       <button class="btn btn-ghost" onclick="pickCat('${p.c}')">Ürünlerini gör</button>
     </div>`).join('');
+  }
 
   render();
 }
@@ -130,9 +160,18 @@ function render(){
 
   const g = document.getElementById('grid');
   if(!list.length){
-    g.innerHTML = `<div class="empty"><h3>Bu kriterlere uyan ürün yok</h3>
-      <p>Filtreleri gevşetebilir ya da talebinizi doğrudan üretici ağına açabilirsiniz.</p>
-      <button class="btn btn-dark" onclick="openDrawer()">Teklif talebi oluştur</button></div>`;
+    g.innerHTML = P.length
+      ? `<div class="empty"><h3>Bu kriterlere uyan ürün yok</h3>
+          <p>Filtreleri gevşetebilir ya da talebinizi doğrudan üretici ağına açabilirsiniz.</p>
+          <button class="btn btn-dark" onclick="openDrawer()">Teklif talebi oluştur</button></div>`
+      : `<div class="empty"><h3>Katalog hazırlanıyor</h3>
+          <p>Üretici başvuruları değerlendiriliyor. Doğrulaması tamamlanan firmaların
+             ürünleri burada yayınlanacak.<br>Aradığınız ürünü şimdiden talep olarak
+             bırakabilirsiniz — ağa katılan üreticilere iletilir.</p>
+          <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+            <button class="btn btn-dark" onclick="openDrawer()">Teklif talebi bırak</button>
+            <button class="btn btn-ghost" onclick="scrollTo2('#tedarikci')">Üretici olarak başvur</button>
+          </div></div>`;
     return;
   }
   g.innerHTML = list.map(p=>{
@@ -331,10 +370,73 @@ function sendRfq(e){
   rfq=[];syncCount();render();
 }
 
-function supplierSubmit(e){
+/* ---------- TEDARİKÇİ BAŞVURUSU ---------- */
+async function supplierSubmit(e){
   e.preventDefault();
-  e.target.reset();
-  toast('Kayıt talebiniz alındı — doğrulama ekibi 1 iş günü içinde arayacak');
+  const f = e.target;
+  const btn = f.querySelector('button[type=submit]');
+  const veri = {
+    'Firma unvanı':   f.s1.value.trim(),
+    'Üretim kolu':    f.s2.options[f.s2.selectedIndex].text,
+    'Şehir':          f.s3.value.trim(),
+    'Yetkili kişi':   f.s5.value.trim(),
+    'E-posta':        f.s4.value.trim(),
+    'Telefon':        f.s6.value.trim(),
+    'Web sitesi':     f.s7.value.trim() || '—',
+    'Kuruluş yılı':   f.s8.value.trim() || '—',
+    'Aylık kapasite': f.s9.value.trim() || '—',
+    'Sertifikalar':   f.s10.value.trim() || '—',
+    'OEM / fason':    f.oem.checked ? 'Evet' : 'Hayır',
+    'Numune':         f.smp.checked ? 'Gönderiyor' : 'Göndermiyor',
+    'Ürün açıklaması':f.s11.value.trim(),
+    'Başvuru tarihi': new Date().toLocaleString('tr-TR')
+  };
+
+  btn.disabled = true;
+  const eski = btn.textContent;
+  btn.textContent = 'Gönderiliyor…';
+
+  try{
+    if(SITE.formEndpoint){
+      const r = await fetch(SITE.formEndpoint,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Accept':'application/json'},
+        body: JSON.stringify(veri)
+      });
+      if(!r.ok) throw new Error('sunucu');
+      basvuruOnay(veri['Firma unvanı']);
+      f.reset();
+    } else {
+      // Form servisi tanımlı değil — hazır e-posta taslağı aç
+      const govde = Object.entries(veri).map(([k,v])=>`${k}: ${v}`).join('\n');
+      const link = `mailto:${SITE.basvuruEposta}`
+        + `?subject=${encodeURIComponent('Üretici başvurusu — '+veri['Firma unvanı'])}`
+        + `&body=${encodeURIComponent(govde)}`;
+      window.location.href = link;
+      toast('E-posta taslağınız açılıyor — göndererek başvuruyu tamamlayın');
+    }
+  }catch(err){
+    toast('Gönderim başarısız — lütfen tekrar deneyin');
+  }finally{
+    btn.disabled = false;
+    btn.textContent = eski;
+  }
+}
+
+function basvuruOnay(firma){
+  document.getElementById('modalBox').innerHTML = `
+    <button class="mclose" onclick="closeAll()" aria-label="Kapat">×</button>
+    <div class="success">
+      <div class="tick">✓</div>
+      <h3>Başvurunuz alındı</h3>
+      <p><strong>${firma}</strong> için üretici başvurusu kaydedildi.</p>
+      <p>Doğrulama ekibi belgelerinizi inceledikten sonra sizinle iletişime geçecek.
+         Onay sonrası firmanız ve ürünleriniz katalogda yayınlanır.</p>
+      <div style="margin-top:22px"><button class="btn btn-dark" onclick="closeAll()">Tamam</button></div>
+    </div>`;
+  document.getElementById('modal').classList.add('on');
+  document.getElementById('scrim').classList.add('on');
+  document.body.style.overflow='hidden';
 }
 
 function closeAll(){

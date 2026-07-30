@@ -20,5 +20,8 @@ Her geliştirme turunda burayı güncelle — sonraki oturumda nerede kaldığı
 
 ## Değişiklik günlüğü
 
+- **2026-07** — Katalog boşaltıldı (göstermelik veriler kaldırıldı), tedarikçi başvuru formu
+  genişletildi, admin.html onay/yayın paneli eklendi
+
 - **2026-07** — Marka adı HAN olarak sabitlendi
 - **2026-07** — İlk sürüm: 12 kategori, 28 ürün, filtreler, arama, ürün detayı, çoklu RFQ sepeti
