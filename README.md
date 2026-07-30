@@ -46,11 +46,12 @@ python3 -m http.server 8000
 ```
 tedarik-pazaryeri/
 ├── index.html              Sayfa iskeleti — bölümler, formlar, statik metinler
+├── admin.html              Yönetim paneli — onaylanan tedarikçiyi katalog koduna çevirir
 ├── assets/
 │   ├── css/styles.css      Tüm görsel tasarım. Renkler en üstteki :root bloğunda
 │   └── js/
 │       ├── config.js       Marka adı, hero metni, istatistikler, renkler
-│       ├── data.js         Kategoriler (CATS) ve ürün kataloğu (P)
+│       ├── data.js         Kategoriler (CATS) ve ürün kataloğu (P — başlangıçta boş)
 │       └── app.js          Filtre, arama, ürün detayı, teklif sepeti mantığı
 └── docs/                   Notlar ve planlama dosyaları
 ```
@@ -92,9 +93,36 @@ tedarik-pazaryeri/
 
 ---
 
+## Tedarikçi başvuru ve onay akışı
+
+1. Üretici, ana sayfadaki **Üretici başvurusu** formunu doldurur
+2. Başvuru size ulaşır (aşağıdaki form servisi kurulumu gerekir)
+3. Belgeleri inceleyip onaylarsınız
+4. `admin.html` panelinde firmanın bilgilerini girip katalog kodunu üretirsiniz
+5. Kodu `assets/js/data.js` içine yapıştırıp commit edersiniz — firma sitede yayına girer
+
+Yayınlama yetkisi yalnızca sizdedir: paneli herkes açabilir ama hiçbir şeyi yayınlayamaz,
+çünkü yayın için depoya commit atmak gerekir.
+
+### Başvuru formunu çalışır hale getirme
+
+Statik sitede form verisini saklayacak sunucu yoktur. Başvuruların e-postanıza düşmesi için:
+
+1. [formspree.io](https://formspree.io) adresinde ücretsiz hesap açın (aylık 50 başvuru)
+2. Yeni bir form oluşturup size verilen adresi kopyalayın (`https://formspree.io/f/xxxxxxx` biçiminde)
+3. `assets/js/config.js` içindeki `formEndpoint` satırına yapıştırın
+4. Commit edin — başvurular artık e-postanıza gelir
+
+Bu adım yapılmazsa form çalışmaya devam eder, ancak başvuruyu gönderene hazır bir
+e-posta taslağı açar. `config.js` içindeki `basvuruEposta` adresini kendi adresinizle
+değiştirmeyi unutmayın.
+
+---
+
 ## Mevcut özellikler
 
-- 12 sektör, 28 örnek ürün kartı
+- 12 sektör kategorisi (katalog başlangıçta boş, kayıtlar onayla eklenir)
+- Tedarikçi başvuru formu ve `admin.html` onay/yayın paneli
 - Kategori, şehir, fiyat aralığı ve tedarikçi niteliği (denetimli / numune / OEM / düşük MOQ) filtreleri
 - Ürün adı, üretici, şehir ve malzeme üzerinden arama
 - Ürün detay penceresi: kademeli fiyat tablosu, MOQ, üretim süresi, aylık kapasite, sertifikalar
@@ -107,7 +135,8 @@ tedarik-pazaryeri/
 
 - [ ] Backend ve veritabanı (ürün, tedarikçi, RFQ tabloları)
 - [ ] Üyelik: ayrı alıcı ve tedarikçi panelleri
-- [ ] Tedarikçi doğrulama akışı (vergi levhası, kapasite raporu, imza sirküleri yükleme)
+- [ ] Şifre korumalı gerçek yönetim paneli (backend gerektirir)
+- [ ] Belge yükleme (vergi levhası, kapasite raporu, imza sirküleri)
 - [ ] Platform içi mesajlaşma — alıcı ile üretici yazışması
 - [ ] Ürün görselleri (şu an CSS ile üretilen geometrik desenler kullanılıyor)
 - [ ] Çoklu dil: İngilizce ve Arapça

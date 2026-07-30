@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Yönetim Paneli — Tedarikçi Onayı</title>
+<link rel="stylesheet" href="assets/css/styles.css">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;800;900&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+body{background:var(--stone)}
+.adminbar{background:var(--ink);color:#fff;padding:16px 0}
+.adminbar .wrap{display:flex;align-items:center;gap:16px}
+.adminbar h1{font-size:20px;font-weight:800}
+.adminbar .tag{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--turq);border:1px solid #2A343D;padding:4px 9px;border-radius:5px}
+.adminbar a{margin-left:auto;font-size:14px;color:#9AA2A9}
+.adminbar a:hover{color:#fff}
+.warnbox{background:#FDF3E7;border:1px solid #E8C89B;border-left:4px solid #C87F2A;border-radius:8px;padding:16px 18px;margin:22px 0;font-size:14.5px}
+.warnbox b{display:block;margin-bottom:5px}
+.panel{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;padding-bottom:60px}
+.box{background:#fff;border:1px solid var(--line);border-radius:10px;padding:22px}
+.box h2{font-size:18px;font-weight:800;margin-bottom:4px}
+.box .sub{color:var(--muted);font-size:14px;margin:0 0 18px}
+.out{background:#0E1418;color:#D6DEE4;font-family:'IBM Plex Mono',monospace;font-size:12.5px;line-height:1.6;padding:16px;border-radius:8px;overflow:auto;max-height:340px;white-space:pre;margin:0}
+.qlist{display:grid;gap:10px;margin-bottom:16px}
+.qitem{border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:flex;gap:12px;align-items:center}
+.qitem .t{flex:1;min-width:0}
+.qitem .t b{display:block;font-size:14.5px}
+.qitem .t span{font-size:12.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace}
+.qitem button{font-size:12.5px;font-weight:700;padding:6px 11px;border-radius:6px;border:1.5px solid var(--line)}
+.qitem button:hover{border-color:var(--ink)}
+.qitem .del{color:var(--bole);border-color:#EBC5C0}
+.stepnum{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--tile);color:#fff;font-size:12px;font-weight:700;margin-right:8px;font-family:'IBM Plex Mono',monospace}
+.howto{counter-reset:s;display:grid;gap:12px;margin-top:6px}
+.howto li{list-style:none;font-size:14.5px;line-height:1.5}
+.howto code{background:var(--stone);border:1px solid var(--line);padding:1px 6px;border-radius:4px;font-family:'IBM Plex Mono',monospace;font-size:13px}
+@media (max-width:960px){.panel{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="adminbar">
+  <div class="wrap">
+    <h1 data-brand="name">HAN</h1>
+    <span class="tag">Yönetim paneli</span>
+    <a href="index.html">← Siteye dön</a>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="warnbox">
+    <b>Bu panel bir güvenlik katmanı değildir</b>
+    Site statik olduğu için burada şifre koruması yoktur ve bu sayfa herkese açıktır. Ancak panel
+    <strong>hiçbir şeyi kendiliğinden yayınlamaz</strong> — yalnızca katalog kodu üretir. Yayınlama yetkisi
+    yalnızca sizde, çünkü kodu GitHub deposuna işleyebilen tek kişi sizsiniz. Gerçek şifreli panel için
+    backend gerekir; yol haritasında bu adım duruyor.
+  </div>
+
+  <div class="panel">
+
+    <div class="box">
+      <h2>Onaylanan tedarikçiyi katalog kaydına çevir</h2>
+      <p class="sub">Başvuruyu inceleyip onayladığınız firmanın bilgilerini girin. Kayıt aşağıda kod olarak oluşur.</p>
+
+      <form id="f" onsubmit="ekle(event)">
+        <div class="field"><label>Firma unvanı *</label><input name="sup" required placeholder="Uludağ Örme Tekstil"></div>
+        <div class="grid2">
+          <div class="field"><label>Şehir *</label><input name="city" required placeholder="Bursa"></div>
+          <div class="field"><label>Sektör *</label><select name="c" id="catSel" required></select></div>
+        </div>
+        <div class="field"><label>Ürün adı ve kısa açıklama *</label><input name="n" required placeholder="Örme Pamuklu T-Shirt · 180 gsm, %100 penye"></div>
+        <div class="grid2">
+          <div class="field"><label>En düşük birim fiyat (USD) *</label><input name="lo" type="number" step="0.01" required placeholder="2.40"></div>
+          <div class="field"><label>En yüksek birim fiyat (USD) *</label><input name="hi" type="number" step="0.01" required placeholder="3.80"></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>Birim *</label><input name="u" required placeholder="adet" value="adet"></div>
+          <div class="field"><label>Minimum sipariş (MOQ) *</label><input name="moq" type="number" required placeholder="500"></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>Üretim süresi</label><input name="lead" placeholder="25-35 gün"></div>
+          <div class="field"><label>Aylık kapasite</label><input name="cap" placeholder="450.000 adet/ay"></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>Kuruluştan bu yana (yıl)</label><input name="yr" type="number" placeholder="18"></div>
+          <div class="field"><label>Alıcı puanı (0-5)</label><input name="rt" type="number" step="0.1" max="5" placeholder="4.8" value="5"></div>
+        </div>
+        <div class="field"><label>Malzeme / teknik özet</label><input name="mat" placeholder="%100 pamuk penye"></div>
+        <div class="field"><label>Ambalaj</label><input name="pack" placeholder="40 adet/koli, polybag"></div>
+        <div class="field"><label>Sertifikalar (virgülle ayırın)</label><input name="cert" placeholder="OEKO-TEX, ISO 9001"></div>
+        <label class="check"><input type="checkbox" name="ver" checked> Yerinde denetimi tamamlandı (doğrulanmış rozeti)</label>
+        <label class="check"><input type="checkbox" name="oem" checked> OEM / fason üretim yapıyor</label>
+        <label class="check"><input type="checkbox" name="smp" checked> Numune gönderiyor</label>
+        <button class="btn btn-dark" style="width:100%;margin-top:14px">Katalog kaydı oluştur</button>
+      </form>
+    </div>
+
+    <div>
+      <div class="box" style="margin-bottom:20px">
+        <h2>Yayına hazır kayıtlar <span id="sayi" class="chip" style="vertical-align:middle"></span></h2>
+        <p class="sub">Bu liste yalnızca sizin tarayıcınızda tutulur. Yayınlamak için kodu depoya işlemeniz gerekir.</p>
+        <div class="qlist" id="liste"></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-bole" onclick="kopyala()">Kodu kopyala</button>
+          <button class="btn btn-ghost" onclick="indir()">data.js olarak indir</button>
+          <button class="btn btn-ghost" onclick="temizle()">Listeyi temizle</button>
+        </div>
+      </div>
+
+      <div class="box" style="margin-bottom:20px">
+        <h2>Üretilen katalog kodu</h2>
+        <p class="sub">Bu kod <code>assets/js/data.js</code> dosyasındaki <code>const P = [...]</code> satırının yerine geçer.</p>
+        <pre class="out" id="kod">const P = [];</pre>
+      </div>
+
+      <div class="box">
+        <h2>Yayınlama adımları</h2>
+        <ol class="howto">
+          <li><span class="stepnum">1</span>Yukarıdaki <b>Kodu kopyala</b> butonuna basın.</li>
+          <li><span class="stepnum">2</span>GitHub'da deponuzu açın: <code>assets/js/data.js</code> dosyasına girin.</li>
+          <li><span class="stepnum">3</span>Sağ üstteki kalem simgesine (Edit) tıklayın.</li>
+          <li><span class="stepnum">4</span>Dosyanın en altındaki <code>const P = [];</code> satırını silip kopyaladığınız kodu yapıştırın.</li>
+          <li><span class="stepnum">5</span><b>Commit changes</b> deyin. 1-2 dakika içinde tedarikçi sitede yayında olur.</li>
+        </ol>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/data.js"></script>
+<script>
+const ANAHTAR = 'han_onayli_tedarikciler';
+let kayitlar = [];
+
+try{ kayitlar = JSON.parse(localStorage.getItem(ANAHTAR) || '[]'); }catch(e){ kayitlar = []; }
+
+document.querySelectorAll('[data-brand="name"]').forEach(e=>e.textContent = SITE.name);
+document.getElementById('catSel').innerHTML =
+  CATS.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+
+function bildir(m){
+  const t=document.getElementById('toast');
+  t.textContent=m; t.classList.add('on');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('on'),2200);
+}
+
+function kaydet(){
+  try{ localStorage.setItem(ANAHTAR, JSON.stringify(kayitlar)); }catch(e){}
+  ciz();
+}
+
+function ekle(e){
+  e.preventDefault();
+  const f = e.target;
+  const v = n => f[n].value.trim();
+  const yeniId = kayitlar.length ? Math.max(...kayitlar.map(k=>k.id)) + 1 : 1;
+
+  kayitlar.push({
+    id: yeniId,
+    n: v('n'), c: v('c'),
+    lo: parseFloat(v('lo')), hi: parseFloat(v('hi')),
+    u: v('u'), moq: parseInt(v('moq')),
+    sup: v('sup'), city: v('city'),
+    ver: f.ver.checked ? 1 : 0,
+    yr: parseInt(v('yr')) || 1,
+    rt: parseFloat(v('rt')) || 5,
+    oem: f.oem.checked ? 1 : 0,
+    smp: f.smp.checked ? 1 : 0,
+    cert: v('cert') ? v('cert').split(',').map(s=>s.trim()).filter(Boolean) : [],
+    lead: v('lead') || 'Üretici ile görüşülür',
+    cap: v('cap') || '—',
+    mat: v('mat') || '—',
+    pack: v('pack') || '—'
+  });
+
+  f.reset();
+  f.rt.value = 5; f.u.value = 'adet';
+  f.ver.checked = f.oem.checked = f.smp.checked = true;
+  kaydet();
+  bildir('Kayıt listeye eklendi');
+}
+
+function sil(i){ kayitlar.splice(i,1); kayitlar.forEach((k,j)=>k.id=j+1); kaydet(); }
+
+function kodUret(){
+  if(!kayitlar.length) return 'const P = [];';
+  const satir = k => ' {' + [
+    `id:${k.id}`, `n:${JSON.stringify(k.n)}`, `c:${JSON.stringify(k.c)}`,
+    `lo:${k.lo}`, `hi:${k.hi}`, `u:${JSON.stringify(k.u)}`, `moq:${k.moq}`,
+    `sup:${JSON.stringify(k.sup)}`, `city:${JSON.stringify(k.city)}`,
+    `ver:${k.ver}`, `yr:${k.yr}`, `rt:${k.rt}`, `oem:${k.oem}`, `smp:${k.smp}`,
+    `cert:${JSON.stringify(k.cert)}`, `lead:${JSON.stringify(k.lead)}`,
+    `cap:${JSON.stringify(k.cap)}`, `mat:${JSON.stringify(k.mat)}`,
+    `pack:${JSON.stringify(k.pack)}`
+  ].join(', ') + '}';
+  return 'const P = [\n' + kayitlar.map(satir).join(',\n') + '\n];';
+}
+
+function ciz(){
+  const l = document.getElementById('liste');
+  document.getElementById('sayi').textContent = kayitlar.length + ' kayıt';
+  l.innerHTML = kayitlar.length
+    ? kayitlar.map((k,i)=>`
+        <div class="qitem">
+          <div class="t"><b>${k.sup}</b><span>${k.n} · ${k.city} · MOQ ${k.moq} ${k.u}</span></div>
+          <button class="del" onclick="sil(${i})">Sil</button>
+        </div>`).join('')
+    : `<p style="color:var(--muted);font-size:14px;margin:0">Henüz kayıt yok. Soldaki formu doldurarak başlayın.</p>`;
+  document.getElementById('kod').textContent = kodUret();
+}
+
+function kopyala(){
+  navigator.clipboard.writeText(kodUret())
+    .then(()=>bildir('Kod panoya kopyalandı'))
+    .catch(()=>bildir('Kopyalanamadı — kodu elle seçip kopyalayın'));
+}
+
+function indir(){
+  const kaynak = document.querySelector('script[src*="data.js"]');
+  fetch(kaynak.src).then(r=>r.text()).then(t=>{
+    const yeni = t.replace(/const P = \[[\s\S]*?\];/, kodUret());
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([yeni],{type:'text/javascript'}));
+    a.download = 'data.js';
+    a.click();
+    bildir('data.js indirildi — depoda aynı dosyanın üzerine yükleyin');
+  }).catch(()=>bildir('İndirilemedi — kopyala yöntemini kullanın'));
+}
+
+function temizle(){
+  if(!kayitlar.length) return;
+  if(confirm('Listedeki tüm kayıtlar silinecek. Emin misiniz?')){
+    kayitlar = []; kaydet(); bildir('Liste temizlendi');
+  }
+}
+
+ciz();
+</script>
+</body>
+</html>
